@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="theme-color" content="#0b1020"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>English Trainer</title>
+  <style>
+    :root {
+      --bg1: #0b1020;
+      --bg2: #0f2b3a;
+      --card: rgba(255,255,255,0.08);
+      --card2: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.65);
+      --ok: #2ee59d;
+      --bad: #ff5c7a;
+      --shadow: 0 18px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(124,92,255,0.22), transparent 55%),
+        radial-gradient(1000px 650px at 90% 30%, rgba(46,229,157,0.16), transparent 55%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 26px;
+    }
+    .wrap { width: min(980px, 100%); display: grid; gap: 18px; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+    .title { display: grid; gap: 6px; }
+    h1 { margin: 0; font-size: 26px; letter-spacing: 0.2px; }
+    .subtitle { color: var(--muted); font-size: 14px; line-height: 1.35; }
+    .pillrow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+    .pill {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      backdrop-filter: blur(10px);
+    }
+    .pill b { color: var(--text); font-weight: 700; }
+
+    .grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 18px; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      padding: 18px;
+    }
+
+    .question { display: grid; gap: 10px; padding: 18px; }
+    .label { color: var(--muted); font-size: 13px; letter-spacing: 0.2px; }
+    .spanish { font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: 0.2px; }
+    .hint { color: var(--muted); font-size: 13px; }
+
+    .inputRow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    input[type="text"] {
+      flex: 1; min-width: 220px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      padding: 14px 14px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    input[type="text"]:focus {
+      border-color: rgba(124,92,255,0.75);
+      box-shadow: 0 0 0 4px rgba(124,92,255,0.18);
+    }
+    input.good {
+      border-color: rgba(46,229,157,0.75) !important;
+      box-shadow: 0 0 0 4px rgba(46,229,157,0.14) !important;
+    }
+    input.bad {
+      border-color: rgba(255,92,122,0.85) !important;
+      box-shadow: 0 0 0 4px rgba(255,92,122,0.14) !important;
+    }
+
+    .btn {
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.10);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background .15s ease, border-color .15s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.20); }
+    .btn.primary { background: rgba(124,92,255,0.22); border-color: rgba(124,92,255,0.40); }
+    .btn.primary:hover { background: rgba(124,92,255,0.28); border-color: rgba(124,92,255,0.55); }
+
+    .btn.toggle {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+    .btn.toggle.active {
+      background: rgba(46,229,157,0.18);
+      border-color: rgba(46,229,157,0.40);
+    }
+
+    .feedback { margin-top: 10px; font-size: 14px; line-height: 1.4; min-height: 22px; }
+    .ok { color: var(--ok); font-weight: 700; }
+    .bad { color: var(--bad); font-weight: 700; }
+    .mono { font-family: var(--mono); }
+
+    .side { display: grid; gap: 12px; align-content: start; }
+    .panelTitle { margin: 0 0 6px 0; font-size: 14px; color: var(--muted); letter-spacing: 0.2px; }
+    .statRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat {
+      padding: 14px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.07);
+    }
+    .stat .k { color: var(--muted); font-size: 12px; }
+    .stat .v { font-size: 18px; font-weight: 800; margin-top: 4px; }
+
+    .bar {
+      height: 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .bar > div {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, rgba(124,92,255,0.9), rgba(46,229,157,0.85));
+      transition: width .2s ease;
+    }
+    .small { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+    .list { max-height: 290px; overflow: auto; padding-right: 4px; }
+    .item {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.16);
+      margin-bottom: 8px;
+    }
+    .item .es { color: var(--muted); font-size: 12px; }
+    .item .en { margin-top: 2px; font-weight: 800; }
+
+    .kbd {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>English Trainer</h1>
+        <div class="subtitle">
+          ES → EN (corrección con <span class="kbd">Enter</span>). 
+          <span class="kbd">?</span> ver respuestas, <span class="kbd">N</span> siguiente.
+          Funciona offline (PWA).
+        </div>
+      </div>
+      <div class="pillrow">
+        <button class="btn toggle" id="btnPhrasal">Phrasal</button>
+        <button class="btn toggle" id="btnVocab">Vocabulario</button>
+        <div class="pill">Cartas: <b id="deckSize">0</b></div>
+        <div class="pill">Mazo: <b id="deckName">—</b></div>
+        <div class="pill">Modo: <b id="mode">Equitativo</b></div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card question">
+        <div class="label">ES (pista)</div>
+        <div class="spanish" id="spanish">—</div>
+        <div class="hint" id="hint">Escribe la respuesta en inglés.</div>
+        <div class="small" id="multiHint"></div>
+
+        <div class="inputRow">
+          <input id="answer" type="text" placeholder="Escribe aquí y pulsa Enter..." autocomplete="off" spellcheck="false" />
+          <button class="btn primary" id="btnCheck">Comprobar</button>
+          <button class="btn" id="btnNext" disabled>Siguiente</button>
+          <button class="btn" id="btnReveal">Ver respuesta</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <p class="panelTitle">Estadísticas</p>
+          <div class="statRow">
+            <div class="stat"><div class="k">Aciertos</div><div class="v" id="correct">0</div></div>
+            <div class="stat"><div class="k">Fallos</div><div class="v" id="wrong">0</div></div>
+            <div class="stat"><div class="k">Racha</div><div class="v" id="streak">0</div></div>
+            <div class="stat"><div class="k">Intentos</div><div class="v" id="attempts">0</div></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="small">Precisión</div>
+            <div class="bar"><div id="bar"></div></div>
+            <div class="small" id="accuracy">0.0%</div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap: wrap;">
+            <button class="btn" id="btnReset">Reiniciar mazo</button>
+            <button class="btn" id="btnReview">Repasar fallos</button>
+          </div>
+          <div class="small" style="margin-top:8px;">
+            Datos guardados en el dispositivo (localStorage).
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="panelTitle">Fallos (para repasar)</p>
+          <div class="list" id="wrongList"></div>
+          <div class="small">Se muestran todas las respuestas válidas.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      PWA local • No se envía nada a internet.
+      Para instalar: menú del navegador → “Instalar app” (Android/Chrome) o “Añadir a pantalla de inicio” (iOS).
+    </footer>
+  </div>
+
+<script>
+  const DECKS = {"phrasal": [{"es": "averiguar / descubrir (información)", "answers": ["find out"]}, {"es": "enterarse (de algo)", "answers": ["find out"]}, {"es": "llevarse bien / caerse bien (con alguien)", "answers": ["get on", "get on with"]}, {"es": "¿Cómo vas? / ¿Cómo te está yendo? (progreso con algo)", "answers": ["get on"]}, {"es": "subirse a / subir a (bus, tren, avión…)", "answers": ["get on"]}, {"es": "seguir / continuar (después de parar o ante una dificultad)", "answers": ["go on"]}, {"es": "pasar / ocurrir (¿qué está pasando?)", "answers": ["go on"]}, {"es": "anotar / apuntar (tomar nota)", "answers": ["note down", "write down", "jot down"]}, {"es": "acabar + -ing / terminar en un sitio o situación (al final)", "answers": ["end up"]}, {"es": "revisar (documento/apuntes) con detalle / leer entero para comprobar", "answers": ["read through", "go through", "go over"]}, {"es": "mirar atrás / pensar en el pasado (recordar, echar la vista atrás)", "answers": ["look back"]}, {"es": "subirse a / entrar en (coche, taxi…)", "answers": ["get into"]}, {"es": "interesarse por / engancharse con (un libro, hobby…)", "answers": ["get into"]}, {"es": "ponerse con una tarea ya (sin retraso) / ponerse a hacer algo", "answers": ["get on with"]}, {"es": "montar / organizar / preparar (algo: sillas, evento, sistema…)", "answers": ["set up"]}, {"es": "tender una trampa / incriminar falsamente (a alguien)", "answers": ["set up"]}, {"es": "trabajar en (un proyecto/tarea)", "answers": ["work on"]}, {"es": "resultar / acabar siendo (al final)", "answers": ["turn out"]}, {"es": "salir bien / resolverse (un plan o problema)", "answers": ["work out"]}, {"es": "hacer ejercicio / entrenar", "answers": ["work out"]}, {"es": "entender", "answers": ["work out"]}, {"es": "salir de un sitio / escapar (peligro, edificio, habitación…)", "answers": ["get out"]}, {"es": "divulgarse / conocerse (una noticia o secreto)", "answers": ["get out"]}, {"es": "levantarse (de la cama) / ponerse en pie (contexto general)", "answers": ["get up"]}, {"es": "rendirse / darse por vencido", "answers": ["give up"]}, {"es": "dejar un hábito / abandonar (por decisión)", "answers": ["give up"]}, {"es": "salir (de casa) / salir fuera (salir a la calle)", "answers": ["go out"]}, {"es": "salir a divertirse (cine, bar, cenar…)", "answers": ["go out"]}, {"es": "apagarse (luz, fuego)", "answers": ["go out"]}, {"es": "mantenerse al mismo nivel/ritmo (seguir sin quedarse atrás)", "answers": ["keep up"]}, {"es": "ponerse (ropa)", "answers": ["put on"]}, {"es": "engordar / ganar peso", "answers": ["put on"]}, {"es": "poner / encender (música, TV…)", "answers": ["put on"]}, {"es": "sentarse", "answers": ["sit down"]}, {"es": "apagar (luz, TV, dispositivo)", "answers": ["turn off"]}, {"es": "desagradar / echar para atrás (algo que te quita las ganas)", "answers": ["turn off"]}, {"es": "despertarse", "answers": ["wake up"]}, {"es": "encontrarse con (algo/alguien) por casualidad", "answers": ["come across"]}, {"es": "dar la impresión (de ser) / sonar de cierta forma", "answers": ["come across"]}, {"es": "volver / regresar (en general)", "answers": ["come back", "go back"]}, {"es": "salir adelante / recuperarse (tras una mala racha)", "answers": ["come through"]}, {"es": "llegar / recibirse (una llamada, mensaje…)", "answers": ["come through"]}, {"es": "atravesar / cruzar (un lugar, control, zona…)", "answers": ["go through"]}, {"es": "pasar por (una experiencia difícil) / sufrir", "answers": ["go through"]}, {"es": "mantenerse firme / aferrarse a (algo)", "answers": ["hold on to"]}, {"es": "esperar un momento / aguantar un poco", "answers": ["hold on"]}, {"es": "colgar (el teléfono)", "answers": ["hold on"]}, {"es": "resistir / aguantar (físicamente)", "answers": ["hold on"]}, {"es": "no tirar la toalla / no rendirse (en una situación difícil)", "answers": ["hold on"]}, {"es": "soportar / aguantar (algo difícil o molesto)", "answers": ["put up with"]}, {"es": "hospedar a alguien (en tu casa)", "answers": ["put someone up"]}, {"es": "entusiasta", "answers": ["keen on"]}, {"es": "revisar / comprobar (algo)", "answers": ["check out"]}, {"es": "estirarse / estirar (el cuerpo)", "answers": ["stretch out"]}, {"es": "estirar/extender", "answers": ["stretch out"]}, {"es": "quitarse (ropa)", "answers": ["take off"]}, {"es": "despegar", "answers": ["take off"]}, {"es": "quitarle algo", "answers": ["take something off"]}, {"es": "lograr (hacer algo)", "answers": ["make it"]}, {"es": "subir (a algo)", "answers": ["step onto"]}, {"es": "empujar (algo)", "answers": ["push something off"]}, {"es": "largo! (coloquial)", "answers": ["push off"]}, {"es": "puro (Ej: pura suerte)", "answers": ["sheer"]}, {"es": "dar vueltas a algo", "answers": ["go over"]}, {"es": "merodear", "answers": ["hang around"]}, {"es": "hacer tiempo", "answers": ["hang around"]}, {"es": "despejarse/aclararse", "answers": ["brighten up"]}, {"es": "embellecer", "answers": ["brighten something up"]}, {"es": "perseguir/buscar(a alguien)", "answers": ["hunt down"]}], "vocab": [{"es": "palo / vara (objeto alargado)", "answers": ["stick"]}, {"es": "pegar / adherirse", "answers": ["stick"]}, {"es": "sujetar/adjuntar", "answers": ["attach"]}, {"es": "solicitar/pedir", "answers": ["request"]}, {"es": "resolver/llegar a un acuerdo", "answers": ["settle"]}, {"es": "cansar/agotar", "answers": ["tire"]}, {"es": "compañero/tio (coloquial)", "answers": ["fellow"]}, {"es": "suspirar", "answers": ["sigh"]}, {"es": "pista", "answers": ["runaway"]}, {"es": "pulso/latido (del corazón)/golpear", "answers": ["pound"]}, {"es": "animar/alegrar", "answers": ["cheer"]}, {"es": "dolor (físico)", "answers": ["ache"]}, {"es": "valla/obstaculo", "answers": ["hurdle"]}, {"es": "bulto", "answers": ["lump"]}, {"es": "rebote / rebotar", "answers": ["bounce"]}, {"es": "tiza", "answers": ["chalk"]}, {"es": "embestir", "answers": ["lunge"]}, {"es": "zancada (ejercicio)", "answers": ["lunge"]}, {"es": "picadura (de insecto)", "answers": ["stung"]}, {"es": "aguijón", "answers": ["stung"]}, {"es": "alivio", "answers": ["relief"]}, {"es": "socorro/asistencia", "answers": ["relief"]}, {"es": "poner a alguien en su lugar (humillar)/menospreciar", "answers": ["put someone down"]}, {"es": "poner algo en su lugar (colocar)", "answers": ["put something down"]}, {"es": "sacrificar", "answers": ["put something down"]}, {"es": "inactivo / sin hacer nada", "answers": ["idle"]}, {"es": "relentí (motor)", "answers": ["idle"]}, {"es": "intersección", "answers": ["junction"]}, {"es": "sala de espera", "answers": ["lounge"]}, {"es": "aburrido/soso", "answers": ["dull"]}]};
+
+  function normalize(s) {
+    return (s || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[–—-]/g, " ")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function setFeedback(html) {
+    document.getElementById("feedback").innerHTML = html;
+  }
+
+  function answersPretty(card) {
+    return (card.answers || []).map(a => `<span class="mono"><b>${a}</b></span>`).join(" / ");
+  }
+
+  function storageKey() {
+    return "en_trainer_state_v1";
+  }
+
+  function defaultDeckState() {
+    return {
+      mode: "cycle",
+      currentIdx: null,
+      locked: false,
+      correct: 0,
+      wrong: 0,
+      streak: 0,
+      attempts: 0,
+      wrongCards: []
+    };
+  }
+
+  function loadAllState() {
+    try {
+      const raw = localStorage.getItem(storageKey());
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveAllState(all) {
+    localStorage.setItem(storageKey(), JSON.stringify(all));
+  }
+
+  function ensureState() {
+    let all = loadAllState();
+    if (!all || typeof all !== "object") {
+      all = {
+        activeKey: "phrasal",
+        perDeck: {
+          phrasal: defaultDeckState(),
+          vocab: defaultDeckState(),
+        }
+      };
+      saveAllState(all);
+    }
+    // Backfill keys if missing
+    if (!all.perDeck) all.perDeck = {};
+    for (const k of Object.keys(DECKS)) {
+      if (!all.perDeck[k]) all.perDeck[k] = defaultDeckState();
+    }
+    if (!all.activeKey || !DECKS[all.activeKey]) all.activeKey = "phrasal";
+    return all;
+  }
+
+  // ---------- Runtime ----------
+  let ALL = ensureState();
+  let activeKey = ALL.activeKey;
+
+  const runtime = {
+    deckQueue: [],      // indices shuffled (equity per card)
+    reviewQueue: [],    // cards (objects)
+  };
+
+  function activeDeck() {
+    return DECKS[activeKey] || [];
+  }
+
+  function activeState() {
+    return ALL.perDeck[activeKey];
+  }
+
+  function setActiveKey(k) {
+    if (!DECKS[k]) return;
+    activeKey = k;
+    ALL.activeKey = k;
+    // reset runtime queues for this deck
+    runtime.deckQueue = [];
+    runtime.reviewQueue = [];
+    saveAllState(ALL);
+    updateHeader();
+    updateStats();
+    renderWrongList();
+    newRound();
+  }
+
+  function updateHeader() {
+    document.getElementById("btnPhrasal").classList.toggle("active", activeKey === "phrasal");
+    document.getElementById("btnVocab").classList.toggle("active", activeKey === "vocab");
+    document.getElementById("deckSize").textContent = activeDeck().length;
+    document.getElementById("deckName").textContent = (activeKey === "phrasal") ? "Phrasal verbs" : "Vocabulario";
+    document.getElementById("hint").textContent = (activeKey === "phrasal")
+      ? "Escribe el phrasal verb en inglés."
+      : "Escribe la palabra en inglés.";
+    document.getElementById("mode").textContent = (activeState().mode === "review") ? "Repaso" : "Equitativo";
+  }
+
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  function buildDeckQueue() {
+    const deck = activeDeck();
+    runtime.deckQueue = Array.from({length: deck.length}, (_, i) => i);
+    shuffleInPlace(runtime.deckQueue);
+  }
+
+  function addWrong(card) {
+    const st = activeState();
+    const key = card.es + "||" + (card.answers || []).join("|");
+    if (!st.wrongCards.some(x => (x.es + "||" + (x.answers || []).join("|")) === key)) {
+      st.wrongCards.push(card);
+      saveAllState(ALL);
+    }
+  }
+
+  function pickCard() {
+    const st = activeState();
+    const deck = activeDeck();
+
+    if (st.mode === "review") {
+      if (runtime.reviewQueue.length) {
+        return runtime.reviewQueue.pop();
+      }
+      // Fin del repaso: vuelve a modo normal automáticamente
+      st.mode = "cycle";
+      saveAllState(ALL);
+      updateHeader();
+    }
+
+    if (!runtime.deckQueue.length) buildDeckQueue();
+    const idx = runtime.deckQueue.pop();
+    return deck[idx];
+  }
+
+  function newRound() {
+    const st = activeState();
+    const card = pickCard();
+    st.currentIdx = null; // not used in this version
+    st.locked = false;
+    saveAllState(ALL);
+
+    const input = document.getElementById("answer");
+    input.value = "";
+    input.classList.remove("good", "bad");
+    input.disabled = false;
+
+    document.getElementById("spanish").textContent = card.es;
+    document.getElementById("btnNext").disabled = true;
+
+    const m = document.getElementById("multiHint");
+    if ((card.answers || []).length > 1) {
+      m.textContent = `Hay ${card.answers.length} respuestas válidas.`;
+    } else {
+      m.textContent = "";
+    }
+
+    setFeedback("");
+    input.focus();
+
+    // store current card on runtime
+    runtime.current = card;
+  }
+
+  function lockInput(cls) {
+    const input = document.getElementById("answer");
+    input.classList.remove("good", "bad");
+    if (cls) input.classList.add(cls);
+    input.disabled = true;
+
+    const st = activeState();
+    st.locked = true;
+    saveAllState(ALL);
+
+    document.getElementById("btnNext").disabled = false;
+  }
+
+  function updateStats() {
+    const st = activeState();
+    document.getElementById("correct").textContent = st.correct;
+    document.getElementById("wrong").textContent = st.wrong;
+    document.getElementById("streak").textContent = st.streak;
+    document.getElementById("attempts").textContent = st.attempts;
+
+    const total = st.attempts || 0;
+    const acc = total ? (100 * st.correct / total) : 0;
+    document.getElementById("accuracy").textContent = acc.toFixed(1) + "%";
+    document.getElementById("bar").style.width = Math.min(100, acc).toFixed(1) + "%";
+
+    document.getElementById("mode").textContent = (st.mode === "review") ? "Repaso" : "Equitativo";
+  }
+
+  function renderWrongList() {
+    const st = activeState();
+    const box = document.getElementById("wrongList");
+    box.innerHTML = "";
+    if (!st.wrongCards.length) {
+      box.innerHTML = '<div class="small">Sin fallos todavía.</div>';
+      return;
+    }
+    st.wrongCards.slice().reverse().forEach(c => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `<div class="es">${c.es}</div><div class="en mono">${(c.answers||[]).join(" / ")}</div>`;
+      box.appendChild(div);
+    });
+  }
+
+  function checkAnswer() {
+    const st = activeState();
+    if (st.locked) return;
+
+    const input = document.getElementById("answer");
+    const user = normalize(input.value);
+
+    if (!user) {
+      setFeedback('<span class="bad">❗</span> Escribe algo primero.');
+      input.focus();
+      return;
+    }
+
+    const accepted = (runtime.current.answers || []).map(normalize);
+    st.attempts += 1;
+
+    if (accepted.includes(user)) {
+      st.correct += 1;
+      st.streak += 1;
+      setFeedback('<span class="ok">✅ Correcto</span>');
+      lockInput("good");
+    } else {
+      st.wrong += 1;
+      st.streak = 0;
+      addWrong(runtime.current);
+      setFeedback(`<span class="bad">❌ Incorrecto.</span> Respuesta(s): ${answersPretty(runtime.current)}`);
+      lockInput("bad");
+    }
+
+    saveAllState(ALL);
+    updateStats();
+    renderWrongList();
+  }
+
+  function reveal() {
+    addWrong(runtime.current);
+    setFeedback(`👉 Respuesta(s): ${answersPretty(runtime.current)}`);
+    renderWrongList();
+  }
+
+  function resetDeck() {
+    ALL.perDeck[activeKey] = defaultDeckState();
+    runtime.deckQueue = [];
+    runtime.reviewQueue = [];
+    saveAllState(ALL);
+    updateHeader();
+    updateStats();
+    renderWrongList();
+    newRound();
+  }
+
+  function startReview() {
+    const st = activeState();
+    if (!st.wrongCards.length) {
+      setFeedback('<span class="ok">✅</span> No tienes fallos para repasar.');
+      return;
+    }
+    st.mode = "review";
+    runtime.reviewQueue = st.wrongCards.slice();
+    shuffleInPlace(runtime.reviewQueue);
+    saveAllState(ALL);
+    updateHeader();
+    setFeedback('<span class="ok">🧠</span> Modo repaso: solo tus fallos.');
+    newRound();
+  }
+
+  // ---------- Events ----------
+  document.getElementById("btnCheck").addEventListener("click", checkAnswer);
+  document.getElementById("btnNext").addEventListener("click", () => {
+    newRound();
+  });
+  document.getElementById("btnReveal").addEventListener("click", reveal);
+  document.getElementById("btnReset").addEventListener("click", resetDeck);
+  document.getElementById("btnReview").addEventListener("click", startReview);
+
+  document.getElementById("btnPhrasal").addEventListener("click", () => setActiveKey("phrasal"));
+  document.getElementById("btnVocab").addEventListener("click", () => setActiveKey("vocab"));
+
+  document.getElementById("answer").addEventListener("keydown", (e) => {
+    const st = activeState();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      checkAnswer();
+    } else if (e.key === "?") {
+      e.preventDefault();
+      reveal();
+    } else if (e.key.toLowerCase() === "n") {
+      if (!document.getElementById("btnNext").disabled) {
+        e.preventDefault();
+        newRound();
+      }
+    }
+  });
+
+  // Service worker
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+
+  // Init
+  updateHeader();
+  updateStats();
+  renderWrongList();
+  newRound();
+</script>
+</body>
+</html>
